@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: Backstage-plugin-for-awx
+  description: |
+    Plugin for launch AWX job templates from Backstage.
+  links:
+    - title: Backstage website
+      url: http://backstage.io
+    - title: Backstage documentation
+      url: https://backstage.io/docs
+    - title: AWX website
+      url: https://www.ansible.com/awx/
+    - title: AWX documentation
+      url: https://ansible.readthedocs.io/projects/awx/en/latest/
+  tags:
+    - awx
+    - plugin
+spec:
+  type: plugin
+  owner: user:albertoagss
+  lifecycle: production
