@@ -1,0 +1,73 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: awx-plugin-template
+  title: AWX Basic Plugin Template
+  description: Template for creating a new Backstage plugin that launch job templates in AWX
+spec:
+  owner: user:albertoagss
+  type: service
+  parameters:
+    - title: Information needed for the plugin creation
+      required:
+        - PluginId
+#        - sourcePath
+        - destinationPath
+      properties:
+        PluginId:
+          title: Plugin ID
+          type: string
+          description: Unique ID for the new plugin
+          ui:autofocus: true
+#        sourcePath:
+#          title: Source Path
+#          type: string
+#          description: The path to the source directory of files to copy
+#          default: ../../templates/awx-job-templates/skeleton
+        destinationPath:
+          title: Destination Path
+          type: string
+          description: The path to the destination directory
+          default: ../../plugins/awx-from-template
+  steps:
+    - id: fetch
+      name: Fetch Template
+      action: fetch:template
+      input:
+        url: ./
+        values:
+          name: ${{ parameters.PluginId }}
+
+    - id: copy-files
+      name: Copy Files to Plugins Directory
+      action: custom:copy-files
+      input:
+        sourcePath: ${{ parameters.sourcePath }}
+        destinationPath: ${{ parameters.destinationPath }}
+
+    # PUBLISH THE CONTENT OF THE WORKING DIRECTORY TO GITHUB
+    - id: publish
+      name: Publish Plugin on GitHub
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Plugins for Backstage created with the template
+        repoUrl: github.com?repo=${{ parameters.PluginId }}&owner=albertoagss
+        token: ${{ secrets.githubToken }}
+
+    # REGISTER THE NEW COMPONENT IN THE CATALOG
+    - id: register
+      name: Register with the catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: http://github.com/albertoagss/${{ parameters.PluginId }}/blob/master/catalog-info.yaml
+
+  output:
+    links:
+      - title: GitHub repository
+        icon: github
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
+

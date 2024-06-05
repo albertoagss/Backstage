@@ -1,0 +1,57 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-awx-job
+  title: Create AWX job template from GitHub Playbook
+  description: This template fetches an Ansible playbook from GitHub and registers it as a job template in AWX, then executes it.
+spec:
+  owner: user:albertoagss
+  type: service
+  parameters:
+    - title: GitHub Playbook Information
+      required:
+        - githubOrg
+        - repoName
+        - playbookPath
+        - awxHost
+        - awxToken
+      properties:
+        githubOrg:
+          title: GitHub Organization
+          type: string
+          default: albertoagss
+        repoName:
+          title: Repository Name
+          type: string
+          default: Proyecto-Final-ASIR
+        playbookPath:
+          title: Playbook Path
+          type: string
+          description: Path to the playbook in the repository
+          default: awx_playbooks/apache_installation/apache_installation.yml
+        awxHost:
+          title: AWX Host
+          type: string
+          description: URL of the AWX instance
+          default: http://192.168.10.100:7007
+        awxToken:
+          title: AWX Token
+          type: string
+          description: API token for AWX
+          ui:widget: password
+  steps:
+    - id: register-job
+      name: Register Job in AWX
+      action: custom:awx-register
+      input:
+        awxHost: ${{ parameters.awxHost }}
+        awxToken: ${{ parameters.awxToken }}
+        playbookPath: ${{ parameters.playbookPath }}
+    - id: execute-job
+      name: Execute Job in AWX
+      action: custom:awx-execute
+      input:
+        awxHost: ${{ parameters.awxHost }}
+        awxToken: ${{ parameters.awxToken }}
+        jobId: ${{ steps.register-job.output.jobId }}
+
